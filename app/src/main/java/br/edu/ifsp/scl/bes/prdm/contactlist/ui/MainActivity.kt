@@ -1,19 +1,23 @@
 package br.edu.ifsp.scl.bes.prdm.contactlist.ui
 
-import android.R
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
+import android.view.View
+import android.widget.AdapterView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import br.edu.ifsp.scl.bes.prdm.contactlist.R
 import br.edu.ifsp.scl.bes.prdm.contactlist.adapter.ContactAdapter
-import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.EXTRA_CONTACT
-import br.edu.ifsp.scl.bes.prdm.contactlist.model.Contact
 import br.edu.ifsp.scl.bes.prdm.contactlist.databinding.ActivityMainBinding
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.EXTRA_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.EXTRA_VIEW_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Contact
 
 class MainActivity : AppCompatActivity() {
     private val amb: ActivityMainBinding by lazy {
@@ -45,14 +49,36 @@ class MainActivity : AppCompatActivity() {
                 else {
                     result.data?.getParcelableExtra<Contact>(EXTRA_CONTACT)
                 }
-                contact?.let{
-                    contactList.add(it)
+                contact?.let{ receivedContact ->
+                    // Verificar se é um novo contato ou se é um contato editado.
+                    val position = contactList.indexOfFirst { it.id == receivedContact.id }
+                    if (position == -1) {
+                        contactList.add(receivedContact)
+                    }
+                    else {
+                        contactList[position] = receivedContact
+                    }
                     contactAdapter.notifyDataSetChanged()
                 }
             }
         }
 
-        fillContactList()
+        registerForContextMenu(amb.contactLv)
+
+        amb.contactLv.onItemClickListener = object: AdapterView.OnItemClickListener {
+            override fun onItemClick(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                Intent(this@MainActivity, ContactActivity::class.java).apply {
+                    putExtra(EXTRA_CONTACT, contactList[position])
+                    putExtra(EXTRA_VIEW_CONTACT, true)
+                    startActivity(this)
+                }
+            }
+        }
 
         amb.contactLv.adapter = contactAdapter
     }
@@ -72,17 +98,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun fillContactList() {
-        for (i in 1..50) {
-            contactList.add(
-                Contact(
-                    i,
-                    "Nome $i",
-                    "Endereço $i",
-                    "Telefone $i",
-                    "Email $i"
-                )
-            )
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        menuInflater.inflate(R.menu.context_menu_main, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val position = (item.menuInfo as AdapterView.AdapterContextMenuInfo).position
+
+        return when(item.itemId) {
+            R.id.remove_contact_mi -> {
+                contactList.removeAt(position)
+                contactAdapter.notifyDataSetChanged()
+                Toast.makeText(this, "Contact removed!", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.edit_contact_mi -> {
+                Intent(this, ContactActivity::class.java).apply {
+                    putExtra(EXTRA_CONTACT, contactList[position])
+                    carl.launch(this)
+                }
+                true
+            }
+            else -> { false }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterForContextMenu(amb.contactLv)
     }
 }
