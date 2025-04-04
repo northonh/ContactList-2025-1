@@ -1,7 +1,7 @@
-package br.edu.ifsp.scl.bes.prdm.contactlist
+package br.edu.ifsp.scl.bes.prdm.contactlist.model
 
 import android.os.Parcelable
-import br.edu.ifsp.scl.bes.prdm.contactlist.Constant.INVALID_CONTACT_ID
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.INVALID_CONTACT_ID
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

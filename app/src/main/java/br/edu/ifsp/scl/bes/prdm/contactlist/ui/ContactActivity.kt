@@ -1,9 +1,11 @@
-package br.edu.ifsp.scl.bes.prdm.contactlist
+package br.edu.ifsp.scl.bes.prdm.contactlist.ui
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import br.edu.ifsp.scl.bes.prdm.contactlist.Constant.EXTRA_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.EXTRA_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Contact
+import br.edu.ifsp.scl.bes.prdm.contactlist.R
 import br.edu.ifsp.scl.bes.prdm.contactlist.databinding.ActivityContactBinding
 
 class ContactActivity : AppCompatActivity() {

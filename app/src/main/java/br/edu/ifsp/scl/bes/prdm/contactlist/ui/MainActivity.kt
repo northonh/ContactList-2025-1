@@ -1,5 +1,6 @@
-package br.edu.ifsp.scl.bes.prdm.contactlist
+package br.edu.ifsp.scl.bes.prdm.contactlist.ui
 
+import android.R
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -9,7 +10,9 @@ import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import br.edu.ifsp.scl.bes.prdm.contactlist.Constant.EXTRA_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.adapter.ContactAdapter
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Constant.EXTRA_CONTACT
+import br.edu.ifsp.scl.bes.prdm.contactlist.model.Contact
 import br.edu.ifsp.scl.bes.prdm.contactlist.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -21,14 +24,8 @@ class MainActivity : AppCompatActivity() {
     private val contactList: MutableList<Contact> = mutableListOf()
 
     // Adapter
-    private val contactAdapter: ArrayAdapter<String> by lazy {
-        ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            contactList.map {
-                "${it.name} - ${it.email}"
-            }
-        )
+    private val contactAdapter: ContactAdapter by lazy {
+        ContactAdapter(this, contactList)
     }
 
     private lateinit var carl: ActivityResultLauncher<Intent>
@@ -38,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(amb.root)
 
         setSupportActionBar(amb.toolbarIn.toolbar)
-        supportActionBar?.subtitle = getString(R.string.contact_list)
+        supportActionBar?.subtitle = getString(br.edu.ifsp.scl.bes.prdm.contactlist.R.string.contact_list)
 
         carl = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -50,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 contact?.let{
                     contactList.add(it)
-                    contactAdapter.add("${it.name} - ${it.email}")
+                    contactAdapter.notifyDataSetChanged()
                 }
             }
         }
@@ -61,13 +58,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(br.edu.ifsp.scl.bes.prdm.contactlist.R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.add_contact_mi -> {
+            br.edu.ifsp.scl.bes.prdm.contactlist.R.id.add_contact_mi -> {
                 carl.launch(Intent(this, ContactActivity::class.java))
                 true
             }

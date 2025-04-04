@@ -1,4 +1,4 @@
-package br.edu.ifsp.scl.bes.prdm.contactlist
+package br.edu.ifsp.scl.bes.prdm.contactlist.model
 
 object Constant {
     const val EXTRA_CONTACT = "EXTRA_CONTACT"
