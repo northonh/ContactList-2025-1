@@ -1,10 +1,11 @@
 package br.edu.ifsp.scl.bes.prdm.contactlist.adapter
 
-import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import br.edu.ifsp.scl.bes.prdm.contactlist.R
 import br.edu.ifsp.scl.bes.prdm.contactlist.databinding.TileContactBinding
 import br.edu.ifsp.scl.bes.prdm.contactlist.model.Contact
 import br.edu.ifsp.scl.bes.prdm.contactlist.ui.OnContactClickListener
@@ -16,6 +17,23 @@ class ContactRvAdapter(
     inner class ContactViewHolder(tcb: TileContactBinding): RecyclerView.ViewHolder(tcb.root){
         val nameTv: TextView = tcb.nameTv
         val emailTv: TextView = tcb.emailTv
+
+        init {
+            // Criando o menu de contexto para cada célula associada a um novo holder
+            tcb.root.setOnCreateContextMenuListener{ menu, v, menuInfo ->
+                (onContactClickListener as AppCompatActivity).menuInflater.inflate(R.menu.context_menu_main, menu)
+                menu.findItem(R.id.edit_contact_mi).setOnMenuItemClickListener {
+                    onContactClickListener.onEditContactMenuItemClick(adapterPosition)
+                    true
+                }
+                menu.findItem(R.id.remove_contact_mi).setOnMenuItemClickListener {
+                    onContactClickListener.onRemoveContactMenuItemClick(adapterPosition)
+                    true
+                }
+            }
+            // Setando o listener de clique curto na célula associada a um novo holder
+            tcb.root.setOnClickListener { onContactClickListener.onContactClick(adapterPosition) }
+        }
     }
 
     // Chamado somente quando um novo holder (e consequentemente uma nova célula) precisa ser criado.
@@ -39,9 +57,6 @@ class ContactRvAdapter(
            with(holder) {
                nameTv.text = contact.name
                emailTv.text = contact.email
-               holder.itemView.setOnClickListener {
-                   onContactClickListener.onContactClick(position)
-               }
            }
        }
     }
