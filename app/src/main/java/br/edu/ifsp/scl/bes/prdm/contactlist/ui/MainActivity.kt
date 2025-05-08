@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
                     else {
                         contactList[position] = receivedContact
                         contactAdapter.notifyItemChanged(position)
+                        mainController.modifyContact(receivedContact)
                     }
                 }
             }
@@ -70,6 +71,8 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
 
         amb.contactRv.adapter = contactAdapter
         amb.contactRv.layoutManager = LinearLayoutManager(this)
+
+        fillContactList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -100,6 +103,7 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
     }
 
     override fun onRemoveContactMenuItemClick(position: Int) {
+        mainController.removeContact(contactList[position].id!!)
         contactList.removeAt(position)
         contactAdapter.notifyItemRemoved(position)
         Toast.makeText(this, "Contact removed!", Toast.LENGTH_SHORT).show()
@@ -110,5 +114,13 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
             putExtra(EXTRA_CONTACT, contactList[position])
             carl.launch(this)
         }
+    }
+
+    private fun fillContactList() {
+        contactList.clear()
+        Thread {
+            contactList.addAll(mainController.getContacts())
+            contactAdapter.notifyDataSetChanged()
+        }.start()
     }
 }

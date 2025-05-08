@@ -3,6 +3,7 @@ package br.edu.ifsp.scl.bes.prdm.contactlist.model
 import android.content.ContentValues
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import java.sql.SQLException
@@ -47,20 +48,50 @@ class ContactSqlite(context: Context): ContactDao {
         contactDatabase.insert(CONTACT_TABLE, null, contact.toContentValues())
 
     override fun retrieveContact(id: Int): Contact {
-        TODO("Not yet implemented")
+        val cursor = contactDatabase.query(
+            true,
+            CONTACT_TABLE,
+            null,
+            "$ID_COLUMN = ?",
+            arrayOf(id.toString()),
+            null,
+            null,
+            null,
+            null
+        )
+
+        return if (cursor.moveToFirst()) {
+            cursor.toContact()
+        }
+        else {
+            Contact()
+        }
     }
 
     override fun retrieveContacts(): MutableList<Contact> {
-        TODO("Not yet implemented")
+        val contactList: MutableList<Contact> = mutableListOf()
+
+        val cursor = contactDatabase.rawQuery("SELECT * FROM $CONTACT_TABLE;", null)
+
+        while (cursor.moveToNext()) {
+            contactList.add(cursor.toContact())
+        }
+
+        return contactList
     }
 
-    override fun updateContact(contact: Contact): Int {
-        TODO("Not yet implemented")
-    }
+    override fun updateContact(contact: Contact) = contactDatabase.update(
+        CONTACT_TABLE,
+        contact.toContentValues(),
+        "$ID_COLUMN = ?",
+        arrayOf(contact.id.toString())
+    )
 
-    override fun deleteContact(id: Int): Int {
-        TODO("Not yet implemented")
-    }
+    override fun deleteContact(id: Int) = contactDatabase.delete(
+        CONTACT_TABLE,
+        "$ID_COLUMN = ?",
+        arrayOf(id.toString())
+    )
 
     private fun Contact.toContentValues() = ContentValues().apply {
             put(ID_COLUMN, id)
@@ -69,4 +100,12 @@ class ContactSqlite(context: Context): ContactDao {
             put(PHONE_COLUMN, phone)
             put(EMAIL_COLUMN, email)
     }
+
+    private fun Cursor.toContact() = Contact(
+        getInt(getColumnIndexOrThrow(ID_COLUMN)),
+        getString(getColumnIndexOrThrow(NAME_COLUMN)),
+        getString(getColumnIndexOrThrow(ADDRESS_COLUMN)),
+        getString(getColumnIndexOrThrow(PHONE_COLUMN)),
+        getString(getColumnIndexOrThrow(EMAIL_COLUMN))
+    )
 }
